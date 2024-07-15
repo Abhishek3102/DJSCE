@@ -1,0 +1,47 @@
+def xor(a, b):
+     result = []
+     for i in range(1, len(b)):
+         if a[i] == b[i]:
+             result.append('0')
+         else:
+             result.append('1')
+     return ''.join(result)
+
+def flip(c):
+     return '1' if (c == '0') else '0'
+
+def CrcGen(poly, deg, bitStream, flag):
+     if flag == 0:
+         for i in range(0,int(deg)):
+             bitStream += '0'
+     dividend = bitStream
+     divisor = poly
+     size = len(divisor)
+     temp = dividend[0:size]
+     quotient = ''
+     while size < len(dividend):
+         while len(temp) < len(divisor):
+             # print(str(temp)+' '+str(size))
+             temp += dividend[size:size+1]
+             size += 1
+         if temp >= divisor:
+             quotient += '1'
+         else:
+             quotient += '0'
+         temp = xor(temp, divisor)
+     ones = ""
+     for i in range(len(temp)):
+        ones += flip(temp[i])
+     return ones,quotient
+
+if __name__ == '__main__':
+     deg = input("Enter the degree: ")
+     poly = input("Enter the polynomial powers: ")
+     bitStream = input("Enter the bit stream: ")
+     rem, quot = CrcGen(poly, deg, bitStream, 0)
+     print((bitStream+rem))
+     rem1, quot1 = CrcGen(poly, deg, (bitStream+rem), 1)
+     if rem1 =='0000':
+         print("No error")
+     else:
+         print(rem1)

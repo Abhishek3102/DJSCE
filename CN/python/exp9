@@ -1,0 +1,76 @@
+import socket
+def Main():
+     host = '127.0.0.1'
+     port = 12345
+     s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+     s.connect((host,port))
+     message = "hello"
+     while True:
+         s.send(message.encode('ascii'))
+         data = s.recv(1024)
+         print('Received from the server :',str(data.decode('ascii')))
+         message = input("Enter your vote:")
+         ans = input('Do you want to continue(y/n) :')
+         if ans == 'y':
+             continue
+         else:
+              message = 'finish'
+              s.send(message.encode('ascii'))
+              break
+     s.close()
+if __name__ == '__main__':
+     Main()
+
+import socket
+from _thread import *
+import threading
+# print_lock = threading.Lock()
+def threaded(c, votes):
+     while True:
+         data = c.recv(1024)
+         if not data:
+              print('Bye')
+              break
+         if str(data.decode('ascii')) == '1':
+             votes[0] += 1
+         if str(data.decode('ascii')) == '2':
+             votes[1] += 1 
+         if str(data.decode('ascii')) == '3':
+             votes[2] += 1
+         if str(data.decode('ascii')) == 'finish':
+             imax= votes[0]
+             for i in votes:
+                 if i>imax:
+                     imax = i
+                     print("Maximum votes are for:", chr(64+int(imax)))  
+                     c.close() 
+                     break
+                 data = "if you want to vote for A send 1, for B send 2 or for C send 3"
+                 c.send(data.encode('ascii'))
+                 for i in votes:
+                     print(i)
+         c.close()
+def Main():
+     host = ""
+     port = 12345
+     votes = [0,0,0]
+     try:
+         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+         print ("Socket successfully created")
+     except socket.error as err:
+         print ("socket creation failed with error %s" %(err))
+     s.bind((host, port))
+     print("socket binded to port", port)
+     s.listen(5)
+     print("socket is listening")
+     while True:
+         c, addr = s.accept()
+         print('Connected to :', addr[0], ':', addr[1])
+         try:
+             start_new_thread(threaded, (c,votes))
+         except:
+             print ("Error: unable to start thread")
+     s.close()
+
+if __name__ == '__main__':
+     Main() 
